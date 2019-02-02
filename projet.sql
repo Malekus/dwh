@@ -560,5 +560,37 @@ AND ROWID IN (
   )
 );
 
+/*
+  FIN PARTIE II
+*/
 
+/*
+PARTIE III, IV, V a faire
+*/
 
+/*
+  PARTIE VI
+*/
+
+--1
+select sector_id,substr(time_id,1,4), id_medicament,ca, rank() over (partition by substr(time_id,1,4),id_medicament order by ca asc) as ordre_ca_duminaumax from d_vente_medicaments where sector_id = 'S4' order by substr(time_id,1,4), id_medicament,ca;
+
+--2
+select sector_id, min(ca) as premier_ca ,max(ca) as dernier_ca from d_vente_medicaments group by sector_id ;
+
+--3
+select A.sector_id, A.id_medicament, A.sum_ca from
+(select sector_id, id_medicament, sum(ca) as sum_ca from d_vente_medicaments group by sector_id, id_medicament order by sector_id asc, sum_ca desc) A
+inner join
+(select sector_id,max(sum_ca) as max_sum from (select sector_id, id_medicament, sum(ca) as sum_ca from d_vente_medicaments group by sector_id, id_medicament order by sector_id asc, sum_ca desc ) group by sector_id order by sector_id) B
+on A.sum_ca = B.max_sum and A.sector_id = B.sector_id ;
+
+--4
+select sector_id, substr(time_id,1,4) as annee, id_medicament, ca , min(ca), max(ca) from d_vente_medicaments group by sector_id, substr(time_id,1,4), id_medicament order by sector_id, annee, id_medicament;
+
+--5
+select sector_id, id_medicament, ca, sum(ca) over ( order by sector_id , id_medicament ,ca) as ca_cumul from d_vente_medicaments order by sector_id, ca_cumul;
+
+/*
+  FIN PARTIE VI
+*/
