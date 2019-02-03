@@ -490,6 +490,7 @@ CD_STATUT VARCHAR2(10), DER_NUM_CTL VARCHAR2(10),
 ID_DER_DEMAND VARCHAR2(30), NOTE_CLIENT NUMBER(10,3),
 POURCENT_PERTE NUMBER(10,3)
 );
+
 /*Insertion dans la table client*/
 INSERT INTO CLIENT
 (CD_PAYS, ID_APPLI, ID_FINANC, ID_CLT, CD_STATUT, DER_NUM_CTL, ID_DER_DEMAND,
@@ -532,14 +533,16 @@ HAVING COUNT(*) > 1;
 
 /*Afficher toutes les lignes en double*/
 SELECT * FROM CLIENT
-where CD_PAYS||''||ID_APPLI||''||ID_FINANC||''||ID_CLT||''||CD_STATUT||''||DER_NUM_CTL||''||ID_DER_DEMAND||''||NOTE_CLIENT||''||POURCENT_PERTE in (
-SELECT CD_PAYS||''||ID_APPLI||''||ID_FINANC||''||ID_CLT||''||CD_STATUT||''||DER_NUM_CTL||''||ID_DER_DEMAND||''||NOTE_CLIENT||''||POURCENT_PERTE FROM CLIENT GROUP BY CD_PAYS, ID_APPLI, ID_FINANC, DER_NUM_CTL, ID_CLT, NOTE_CLIENT ,POURCENT_PERTE, CD_STATUT, ID_DER_DEMAND
+WHERE CD_PAYS||''||ID_APPLI||''||ID_FINANC||''||ID_CLT||''||CD_STATUT||''||DER_NUM_CTL||''||ID_DER_DEMAND||''||NOTE_CLIENT||''||POURCENT_PERTE IN (
+SELECT CD_PAYS||''||ID_APPLI||''||ID_FINANC||''||ID_CLT||''||CD_STATUT||''||DER_NUM_CTL||''||ID_DER_DEMAND||''||NOTE_CLIENT||''||POURCENT_PERTE 
+FROM CLIENT GROUP BY CD_PAYS, ID_APPLI, ID_FINANC, DER_NUM_CTL, ID_CLT, NOTE_CLIENT ,POURCENT_PERTE, CD_STATUT, ID_DER_DEMAND
 HAVING COUNT(*) > 1);
 
 /*Supprimer tous les doublons*/
 DELETE FROM client
-WHERE CD_PAYS||''||ID_APPLI||''||ID_FINANC||''||ID_CLT||''||CD_STATUT||''||DER_NUM_CTL||''||ID_DER_DEMAND||''||NOTE_CLIENT||''||POURCENT_PERTE in (
-SELECT CD_PAYS||''||ID_APPLI||''||ID_FINANC||''||ID_CLT||''||CD_STATUT||''||DER_NUM_CTL||''||ID_DER_DEMAND||''||NOTE_CLIENT||''||POURCENT_PERTE FROM CLIENT GROUP BY CD_PAYS, ID_APPLI, ID_FINANC, DER_NUM_CTL, ID_CLT, NOTE_CLIENT ,POURCENT_PERTE, CD_STATUT, ID_DER_DEMAND
+WHERE CD_PAYS||''||ID_APPLI||''||ID_FINANC||''||ID_CLT||''||CD_STATUT||''||DER_NUM_CTL||''||ID_DER_DEMAND||''||NOTE_CLIENT||''||POURCENT_PERTE IN (
+SELECT CD_PAYS||''||ID_APPLI||''||ID_FINANC||''||ID_CLT||''||CD_STATUT||''||DER_NUM_CTL||''||ID_DER_DEMAND||''||NOTE_CLIENT||''||POURCENT_PERTE 
+FROM CLIENT GROUP BY CD_PAYS, ID_APPLI, ID_FINANC, DER_NUM_CTL, ID_CLT, NOTE_CLIENT ,POURCENT_PERTE, CD_STATUT, ID_DER_DEMAND
 HAVING COUNT(*) > 1);
 
 /*Suprimme tous les doublons sauf un pour CD_PAYS=DE*/
@@ -551,7 +554,7 @@ AND ROWID IN (
   )
 );
 
-/*Suprimme tous les doublons sauf un pour CD_PAYS=DE*/
+/*Suprimme tous les doublons sauf un pour CD_PAYS=FR*/
 DELETE FROM client
 WHERE CD_PAYS = 'FR'
 AND ROWID IN (
@@ -609,11 +612,56 @@ exec deleteByObjectType('procedure', 'malekus');
   FINN PARTIE III
 */
 
-
+/*
+  PARTIE IV
+*/
 
 /*
-PARTIE IV, V a faire
+  FIN PARTIE IV
 */
+
+/*
+  PARTIE V
+*/
+
+--a
+select * from D_CLASSE_THERAPEUTIQUE order by ID_CLASSE_THERAPEUTIQUE;
+
+
+--b
+select sector_id, substr(time_id,1,4) as annee , sum(ca) as total_ca
+from d_vente_medicaments group by sector_id, substr(time_id,1,4)
+order by sector_id,substr(time_id,1,4);
+
+--c
+select A.pays,A.sector_id, A.SITUATION_GEOGRAPHIQUE, sum(B.ca) as total_ca
+from D_DIM_SECTOR A ,  d_vente_medicaments B where A.sector_id = B.sector_id
+group by A.pays,A.sector_id, A.SITUATION_GEOGRAPHIQUE;
+
+
+--d
+select A.id_classe_therapeutique from D_MEDICAMENTS A , d_vente_medicaments B
+where A.id_medicament = B.id_medicament group by A.id_classe_therapeutique
+order by A.id_classe_therapeutique;
+
+
+--e
+select * from (select sector_id , sum(ca) as total_ca from d_vente_medicaments
+group by sector_id order by sector_id ) where total_ca > 8000  ;
+
+
+--f
+select B.sector_id, B.time_id,B.id_medicament, sum(B.ca) as ca, sum(B.marge) as marge
+from D_DIM_SECTOR A ,  d_vente_medicaments B
+where A.sector_id = B.sector_id and pays = 'FRANCE' and situation_geographique = 'SUD' and
+(substr(time_id,5,6) = 10 or substr(time_id,5,6) =11 or  substr(time_id,5,6) = 12)
+and substr(time_id,1,4) = 2011 group by B.sector_id, B.time_id,B.id_medicament
+order by time_id ;
+
+/*
+  FIN PARTIE V
+*/
+
 
 /*
   PARTIE VI
