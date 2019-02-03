@@ -489,7 +489,7 @@ ID_FINANC VARCHAR2(30), ID_CLT VARCHAR2(30),
 CD_STATUT VARCHAR2(10), DER_NUM_CTL VARCHAR2(10),
 ID_DER_DEMAND VARCHAR2(30), NOTE_CLIENT NUMBER(10,3),
 POURCENT_PERTE NUMBER(10,3)
-)
+);
 /*Insertion dans la table client*/
 INSERT INTO CLIENT
 (CD_PAYS, ID_APPLI, ID_FINANC, ID_CLT, CD_STATUT, DER_NUM_CTL, ID_DER_DEMAND,
@@ -565,7 +565,54 @@ AND ROWID IN (
 */
 
 /*
-PARTIE III, IV, V a faire
+  PARTIE III
+*/
+/*Creation d'une table de trvail similaire a la table CLIENT*/
+DROP TABLE W_CLIENT;
+CREATE TABLE W_CLIENT AS SELECT * FROM CLIENT;
+
+/*Création de l'index sur la table w_client*/
+DROP INDEX idx1_w_clt ;
+CREATE INDEX idx1_w_clt ON w_client (CD_PAYS, ID_CLT);
+
+/*Execution de la requete dynamique */
+SELECT owner ,object_name,object_type,status FROM dba_objects WHERE owner = (SELECT user FROM dual) AND
+status!= 'VALID';
+
+/*Affichage de la liste des tablespaces*/
+select * from DBA_TABLESPACES;
+
+/*Afficher le tablespace de la table w_client*/
+SELECT owner, table_name, tablespace_name FROM dba_tables WHERE table_name='W_CLIENT';
+
+/*Déplacer le tablespace dans un autre*/
+ALTER TABLE W_CLIENT MOVE TABLESPACE USERS;
+
+/*Executer la requete suivante*/
+SELECT owner, object_name,object_type,status FROM dba_objects WHERE owner = (SELECT user FROM dual) AND
+status != 'VALID';
+
+CREATE OR REPLACE PROCEDURE deleteByObjectType(myType IN VARCHAR, myUser IN VARCHAR)
+IS
+BEGIN
+  FOR line IN (SELECT object_name FROM ALL_OBJECTS WHERE status != 'VALID' AND object_type=UPPER(myType) 
+  AND owner=UPPER(myUser)) LOOP
+    EXECUTE IMMEDIATE 'DROP ' || UPPER(myType) || ' ' || line.object_name;
+    DBMS_OUTPUT.put_line(line.object_name || ' deleted !');
+  END LOOP;
+END;
+/
+
+exec deleteByObjectType('procedure', 'malekus');
+
+/*
+  FINN PARTIE III
+*/
+
+
+
+/*
+PARTIE IV, V a faire
 */
 
 /*
